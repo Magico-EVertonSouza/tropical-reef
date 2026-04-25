@@ -1,0 +1,170 @@
+Build a full-stack Progressive Web App (PWA) for a coral shop called "Tropical Reef".
+
+The app must be designed as a scalable system, not just a simple website.
+
+━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 CORE PURPOSE:
+
+Create a professional digital catalog for selling corals, replacing WhatsApp-based sales with an organized system, while still using WhatsApp as the final order channel.
+
+━━━━━━━━━━━━━━━━━━━━━━━
+
+👥 USER ROLES:
+
+1. Visitor (not logged in)
+2. Customer (authenticated)
+3. Admin
+
+━━━━━━━━━━━━━━━━━━━━━━━
+
+🔐 AUTHENTICATION:
+
+Implement authentication using Firebase Authentication:
+
+* Email and password login
+* Register new account
+* Login / Logout
+
+Keep authentication simple but structured for future expansion.
+
+━━━━━━━━━━━━━━━━━━━━━━━
+
+📦 DATABASE STRUCTURE (IMPORTANT):
+
+Use a clean and scalable structure (Firestore or similar):
+
+Collection: corals
+
+* id
+* name
+* price
+* category (Zoanthus, SPS, LPS, etc.)
+* description
+* size
+* imageUrl
+* status (available, reserved, sold)
+* createdAt
+
+Collection: users
+
+* id
+* name
+* email
+* role (customer/admin)
+* createdAt
+
+━━━━━━━━━━━━━━━━━━━━━━━
+
+🖥️ CUSTOMER FEATURES:
+
+* Browse coral catalog
+
+* Filter by category
+
+* View coral details
+
+* Select multiple corals
+
+* Each coral must display:
+
+  * Image
+  * Name
+  * Price
+  * Unique code (e.g., TR-001)
+  * Status badge (Available / Reserved / Sold)
+
+* Add corals to a temporary selection (cart-like behavior)
+
+* Button: “Order via WhatsApp”
+
+When clicked:
+
+* Generate a message containing:
+
+  * Customer name (if logged in)
+  * List of selected coral codes
+* Open WhatsApp with pre-filled message
+
+━━━━━━━━━━━━━━━━━━━━━━━
+
+🛠️ ADMIN PANEL:
+
+Protected admin dashboard:
+
+* Create coral
+* Edit coral
+* Delete coral
+* Update price
+* Update status
+* Upload image
+
+Admin interface must be simple and mobile-friendly.
+
+━━━━━━━━━━━━━━━━━━━━━━━
+
+🎨 UI / DESIGN:
+
+* Premium, modern design
+
+* Dark theme (black background)
+
+* Gold accents
+
+* Red highlights inspired by coral
+
+* Card-based layout
+
+* Strong focus on images
+
+* Clean typography
+
+━━━━━━━━━━━━━━━━━━━━━━━
+
+📱 PWA REQUIREMENTS:
+
+* Installable app
+* Responsive (mobile-first)
+* Fast loading
+* Offline-ready (basic caching)
+
+━━━━━━━━━━━━━━━━━━━━━━━
+
+⚙️ TECH STACK:
+
+* Frontend: React (preferred)
+* Backend: Firebase (Firestore, Auth, Storage)
+
+Ensure code is modular and well-structured.
+
+━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 FUTURE-READY (DO NOT IMPLEMENT YET):
+
+Prepare architecture for:
+
+* Order history
+* Favorites system
+* Notifications
+* Full checkout system
+
+━━━━━━━━━━━━━━━━━━━━━━━
+
+💡 IMPORTANT CONSTRAINTS:
+
+* DO NOT implement payment system
+* DO NOT overcomplicate the cart
+* Keep ordering via WhatsApp
+* Focus on performance and simplicity
+
+━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 FINAL GOAL:
+
+Deliver a clean, scalable, and production-ready PWA that:
+
+* Organizes coral sales
+* Simplifies customer ordering
+* Allows admin to manage stock efficiently
+
+Code must be readable, maintainable, and ready for future expansion.

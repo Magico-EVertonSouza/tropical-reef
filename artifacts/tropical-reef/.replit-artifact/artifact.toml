@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Tropical Reef"
+version = "1.0.0"
+id = "artifacts/tropical-reef"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19662
+
+[services.development]
+run = "pnpm --filter @workspace/tropical-reef run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/tropical-reef", "run", "build" ]
+publicDir = "artifacts/tropical-reef/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19662"
+BASE_PATH = "/"
