@@ -1,0 +1,8 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "4BStZAVvj9rmrYKSM3Y59"
+uri = "file://artifacts/tropical-reef/public/hero-bg.png"
+type = "image"
+title = "dark luxury coral reef"
