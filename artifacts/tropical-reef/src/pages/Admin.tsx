@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/context/AuthContext";
 import { getCorals, deleteCoral } from "@/lib/firestore";
+import { seedCoralsIfEmpty } from "@/lib/seed";
 import type { Coral } from "@/types/coral";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,7 +10,7 @@ import { CoralDialog } from "@/components/CoralDialog";
 import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, LayoutDashboard } from "lucide-react";
+import { Plus, Pencil, Trash2, LayoutDashboard, DatabaseZap } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   AlertDialog,
@@ -29,9 +30,10 @@ export default function Admin() {
 
   const [corals, setCorals] = useState<Coral[]>([]);
   const [loading, setLoading] = useState(true);
+  const [seeding, setSeeding] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedCoral, setSelectedCoral] = useState<Coral | null>(null);
-  
+
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [coralToDelete, setCoralToDelete] = useState<Coral | null>(null);
 
@@ -83,6 +85,23 @@ export default function Admin() {
     setDialogOpen(true);
   };
 
+  const handleSeed = async () => {
+    setSeeding(true);
+    try {
+      const { seeded, count } = await seedCoralsIfEmpty();
+      if (seeded) {
+        toast({ title: "Seed concluído", description: `${count} corais inseridos com sucesso.` });
+        fetchCorals();
+      } else {
+        toast({ title: "Sem alterações", description: `Todos os ${count} corais já existiam.` });
+      }
+    } catch (err: any) {
+      toast({ title: "Erro no seed", description: err?.message ?? "Falha ao inserir corais de demonstração.", variant: "destructive" });
+    } finally {
+      setSeeding(false);
+    }
+  };
+
   const confirmDelete = (coral: Coral) => {
     setCoralToDelete(coral);
     setDeleteDialogOpen(true);
@@ -118,10 +137,21 @@ export default function Admin() {
           </h1>
           <p className="text-muted-foreground mt-1">Gerencie seu catálogo de corais.</p>
         </div>
-        <Button onClick={handleCreate} className="gap-2" data-testid="btn-create-coral">
-          <Plus className="w-4 h-4" />
-          Novo Coral
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={handleSeed}
+            disabled={seeding}
+            className="gap-2 border-border/50 text-muted-foreground hover:text-white hover:border-primary/50"
+          >
+            <DatabaseZap className="w-4 h-4" />
+            {seeding ? "Inserindo..." : "Seed Demo"}
+          </Button>
+          <Button onClick={handleCreate} className="gap-2" data-testid="btn-create-coral">
+            <Plus className="w-4 h-4" />
+            Novo Coral
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

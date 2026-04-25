@@ -5,11 +5,10 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
-  query,
-  orderBy,
   where,
+  query,
   serverTimestamp,
-  getDoc,
+  writeBatch,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { db, storage } from "./firebase";
@@ -17,41 +16,38 @@ import type { Coral, CoralCategory, CoralStatus, CoralFormData } from "@/types/c
 
 const CORALS_COLLECTION = "corals";
 
-function generateCoralCode(index: number): string {
-  return `TR-${String(index).padStart(3, "0")}`;
-}
-
 export async function getCorals(filters?: {
   category?: CoralCategory;
   status?: CoralStatus;
 }): Promise<Coral[]> {
-  let q = query(collection(db, CORALS_COLLECTION), orderBy("createdAt", "desc"));
+  console.log("[Firestore] getCorals, filtros:", filters ?? "nenhum");
 
+  let snapshot;
   if (filters?.category) {
-    q = query(
+    const q = query(
       collection(db, CORALS_COLLECTION),
-      where("category", "==", filters.category),
-      orderBy("createdAt", "desc")
+      where("category", "==", filters.category)
     );
+    snapshot = await getDocs(q);
+  } else {
+    snapshot = await getDocs(collection(db, CORALS_COLLECTION));
   }
 
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-    createdAt: doc.data().createdAt?.toDate() ?? null,
+  const corals = snapshot.docs.map((d) => ({
+    id: d.id,
+    ...d.data(),
+    createdAt: d.data().createdAt?.toDate?.() ?? null,
   })) as Coral[];
-}
 
-export async function getCoralById(id: string): Promise<Coral | null> {
-  const docRef = doc(db, CORALS_COLLECTION, id);
-  const snapshot = await getDoc(docRef);
-  if (!snapshot.exists()) return null;
-  return {
-    id: snapshot.id,
-    ...snapshot.data(),
-    createdAt: snapshot.data().createdAt?.toDate() ?? null,
-  } as Coral;
+  // Sort client-side — no composite index required
+  corals.sort((a, b) => {
+    const aTime = (a.createdAt as Date | null)?.getTime() ?? 0;
+    const bTime = (b.createdAt as Date | null)?.getTime() ?? 0;
+    return bTime - aTime;
+  });
+
+  console.log(`[Firestore] getCorals → ${corals.length} corais`);
+  return corals;
 }
 
 export async function uploadCoralImage(file: File, coralId: string): Promise<string> {
@@ -66,12 +62,13 @@ export async function deleteCoralImage(imageUrl: string): Promise<void> {
     const storageRef = ref(storage, imageUrl);
     await deleteObject(storageRef);
   } catch {
+    // ignore if no image
   }
 }
 
 export async function createCoral(data: CoralFormData): Promise<string> {
   const allCorals = await getDocs(collection(db, CORALS_COLLECTION));
-  const code = generateCoralCode(allCorals.size + 1);
+  const code = `TR-${String(allCorals.size + 1).padStart(3, "0")}`;
 
   const docRef = await addDoc(collection(db, CORALS_COLLECTION), {
     name: data.name,
@@ -93,10 +90,7 @@ export async function createCoral(data: CoralFormData): Promise<string> {
   return docRef.id;
 }
 
-export async function updateCoral(
-  id: string,
-  data: Partial<CoralFormData>
-): Promise<void> {
+export async function updateCoral(id: string, data: Partial<CoralFormData>): Promise<void> {
   const docRef = doc(db, CORALS_COLLECTION, id);
   const updateData: Record<string, unknown> = {
     name: data.name,
@@ -120,4 +114,18 @@ export async function deleteCoral(id: string, imageUrl?: string): Promise<void> 
     await deleteCoralImage(imageUrl);
   }
   await deleteDoc(doc(db, CORALS_COLLECTION, id));
+}
+
+/**
+ * Batch-insert corals. Used by seed.ts and the Admin "Seed Demo" button.
+ */
+export async function batchInsertCorals(
+  corals: Array<Record<string, unknown>>
+): Promise<void> {
+  const batch = writeBatch(db);
+  for (const coral of corals) {
+    const newDoc = doc(collection(db, CORALS_COLLECTION));
+    batch.set(newDoc, { ...coral, createdAt: serverTimestamp() });
+  }
+  await batch.commit();
 }
