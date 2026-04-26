@@ -11,6 +11,7 @@ interface SeedCoral {
   description: string;
   size: string;
   status: CoralStatus;
+  stock: number;
   imageUrl: string;
 }
 
@@ -23,6 +24,7 @@ export const SEED_CORALS: SeedCoral[] = [
     description: "Zoanthus de cores vibrantes com tons de verde neon, laranja e roxo.",
     size: "3-4 pólipos",
     status: "available",
+    stock: 3,
     imageUrl: "https://images.unsplash.com/photo-1582967788606-a171c1080cb0?w=600&q=80",
   },
   {
@@ -33,6 +35,7 @@ export const SEED_CORALS: SeedCoral[] = [
     description: "Acropora de crescimento ramificado com coloração azul intensa.",
     size: "6cm",
     status: "available",
+    stock: 2,
     imageUrl: "https://images.unsplash.com/photo-1546026423-cc4642628d2b?w=600&q=80",
   },
   {
@@ -43,6 +46,7 @@ export const SEED_CORALS: SeedCoral[] = [
     description: "LPS de tentáculos longos e dourados com ponta branca.",
     size: "2 cabeças",
     status: "available",
+    stock: 1,
     imageUrl: "https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?w=600&q=80",
   },
   {
@@ -53,6 +57,7 @@ export const SEED_CORALS: SeedCoral[] = [
     description: "SPS encrostante com coloração laranja vibrante. Crescimento rápido.",
     size: "4cm fragmento",
     status: "available",
+    stock: 5,
     imageUrl: "https://images.unsplash.com/photo-1504198266287-1659872e6590?w=600&q=80",
   },
   {
@@ -63,6 +68,7 @@ export const SEED_CORALS: SeedCoral[] = [
     description: "Cogumelo com tons de verde, azul e roxo. Fácil de manter.",
     size: "3cm",
     status: "available",
+    stock: 4,
     imageUrl: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600&q=80",
   },
   {
@@ -73,6 +79,7 @@ export const SEED_CORALS: SeedCoral[] = [
     description: "LPS com tentáculos em formato de martelo roxo e verde.",
     size: "3 cabeças",
     status: "reserved",
+    stock: 1,
     imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600&q=80",
   },
   {
@@ -83,6 +90,7 @@ export const SEED_CORALS: SeedCoral[] = [
     description: "SPS ramificado de coloração rosa brilhante.",
     size: "5cm",
     status: "available",
+    stock: 2,
     imageUrl: "https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=600&q=80",
   },
   {
@@ -93,6 +101,7 @@ export const SEED_CORALS: SeedCoral[] = [
     description: "Raro e muito valorizado. Coloração roxa intensa com centro vermelho.",
     size: "5-6 pólipos",
     status: "available",
+    stock: 1,
     imageUrl: "https://images.unsplash.com/photo-1566228015668-4c45dbc4e2f5?w=600&q=80",
   },
   {
@@ -103,6 +112,7 @@ export const SEED_CORALS: SeedCoral[] = [
     description: "Coral colonial com tentáculos longos e verdes.",
     size: "4 cabeças",
     status: "available",
+    stock: 3,
     imageUrl: "https://images.unsplash.com/photo-1498612753354-772a30629934?w=600&q=80",
   },
   {
@@ -113,6 +123,7 @@ export const SEED_CORALS: SeedCoral[] = [
     description: "Coral de couro clássico, muito resistente e fácil de manter.",
     size: "7cm",
     status: "sold",
+    stock: 0,
     imageUrl: "https://images.unsplash.com/photo-1532274402911-5a369e4c4bb5?w=600&q=80",
   },
 ];

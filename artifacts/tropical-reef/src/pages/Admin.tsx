@@ -110,7 +110,7 @@ export default function Admin() {
   const handleDelete = async () => {
     if (!coralToDelete) return;
     try {
-      await deleteCoral(coralToDelete.id, coralToDelete.imageUrl);
+      await deleteCoral(coralToDelete.id);
       toast({ title: "Sucesso", description: "Coral excluído." });
       fetchCorals();
     } catch (error) {
@@ -191,6 +191,7 @@ export default function Admin() {
                 <TableHead>Nome</TableHead>
                 <TableHead>Categoria</TableHead>
                 <TableHead>Preço</TableHead>
+                <TableHead>Estoque</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
@@ -204,13 +205,14 @@ export default function Admin() {
                     <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                     <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-8" /></TableCell>
                     <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
                     <TableCell><Skeleton className="h-8 w-16 ml-auto" /></TableCell>
                   </TableRow>
                 ))
               ) : corals.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center py-10 text-muted-foreground">
                     Nenhum coral cadastrado.
                   </TableCell>
                 </TableRow>
@@ -230,6 +232,7 @@ export default function Admin() {
                     <TableCell className="font-medium text-white">{coral.name}</TableCell>
                     <TableCell className="text-muted-foreground">{coral.category}</TableCell>
                     <TableCell className="font-semibold text-primary">R$ {coral.price.toFixed(2).replace('.', ',')}</TableCell>
+                    <TableCell className="text-muted-foreground">{coral.stock ?? 1}</TableCell>
                     <TableCell>
                       <Badge 
                         variant="outline" 

@@ -18,6 +18,7 @@ export interface Coral {
   imageUrl: string;
   status: CoralStatus;
   code: string;
+  stock: number;
   createdAt: Date | null;
 }
 
@@ -28,7 +29,9 @@ export interface CoralFormData {
   description: string;
   size: string;
   status: CoralStatus;
+  stock: number;
   imageFile?: File | null;
+  imageUrl?: string;
 }
 
 export interface User {

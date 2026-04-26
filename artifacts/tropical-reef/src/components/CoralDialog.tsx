@@ -37,20 +37,15 @@ import { Loader2 } from "lucide-react";
 ========================= */
 async function uploadImage(file: File) {
   const formData = new FormData();
-
   formData.append("file", file);
   formData.append("upload_preset", "tropicalreef");
 
   const res = await fetch(
     "https://api.cloudinary.com/v1_1/dwy7cw3rq/image/upload",
-    {
-      method: "POST",
-      body: formData,
-    }
+    { method: "POST", body: formData }
   );
 
   const data = await res.json();
-
   console.log("CLOUDINARY RESPONSE:", data);
 
   if (!data.secure_url) {
@@ -78,6 +73,7 @@ const coralSchema = z.object({
   size: z.string().min(1),
   description: z.string().optional(),
   status: z.enum(["available", "reserved", "sold"]),
+  stock: z.coerce.number().min(0),
 });
 
 type FormValues = z.infer<typeof coralSchema>;
@@ -110,6 +106,7 @@ export function CoralDialog({
       size: "",
       description: "",
       status: "available",
+      stock: 1,
     },
   });
 
@@ -122,8 +119,8 @@ export function CoralDialog({
         size: coral.size,
         description: coral.description || "",
         status: coral.status,
+        stock: coral.stock ?? 1,
       });
-
       setImagePreview(coral.imageUrl || null);
       setImageFile(null);
     } else if (open) {
@@ -134,8 +131,8 @@ export function CoralDialog({
         size: "",
         description: "",
         status: "available",
+        stock: 1,
       });
-
       setImagePreview(null);
       setImageFile(null);
     }
@@ -145,63 +142,47 @@ export function CoralDialog({
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setImageFile(file);
-
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
+      reader.onloadend = () => setImagePreview(reader.result as string);
       reader.readAsDataURL(file);
     }
   };
 
-  /* =========================
-     SUBMIT CORRIGIDO
-  ========================= */
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
 
     try {
       let imageUrl = coral?.imageUrl || "";
 
-      // 👉 se nova imagem foi escolhida
       if (imageFile) {
         imageUrl = await uploadImage(imageFile);
       }
 
-      // 🔥 proteção contra imagem vazia
       if (!imageUrl) {
         throw new Error("Imagem obrigatória não enviada.");
       }
 
-      console.log("FINAL IMAGE URL:", imageUrl);
+      console.log("[CoralDialog] Saving — status:", values.status, "stock:", values.stock);
 
       const data: CoralFormData = {
         ...values,
         description: values.description || "",
+        stock: values.stock,
         imageUrl,
       };
 
       if (coral) {
         await updateCoral(coral.id, data);
-
-        toast({
-          title: "Sucesso",
-          description: "Coral atualizado com sucesso.",
-        });
+        toast({ title: "Sucesso", description: "Coral atualizado com sucesso." });
       } else {
         await createCoral(data);
-
-        toast({
-          title: "Sucesso",
-          description: "Coral criado com sucesso.",
-        });
+        toast({ title: "Sucesso", description: "Coral criado com sucesso." });
       }
 
       onSuccess();
       onOpenChange(false);
     } catch (error: any) {
-      console.error(error);
-
+      console.error("[CoralDialog] Error:", error);
       toast({
         title: "Erro",
         description: error.message || "Erro ao salvar coral.",
@@ -214,7 +195,7 @@ export function CoralDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md sm:max-w-[600px] bg-card border-border/50">
+      <DialogContent className="max-w-md sm:max-w-[600px] bg-card border-border/50 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-primary text-2xl">
             {coral ? "Editar Coral" : "Novo Coral"}
@@ -228,100 +209,132 @@ export function CoralDialog({
             <div className="flex flex-col items-center gap-4 mb-4">
               <div className="w-40 h-40 border rounded-lg overflow-hidden bg-muted flex items-center justify-center">
                 {imagePreview ? (
-                  <img
-                    src={imagePreview}
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={imagePreview} className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-muted-foreground text-sm">
-                    Sem imagem
-                  </span>
+                  <span className="text-muted-foreground text-sm">Sem imagem</span>
                 )}
               </div>
-
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-              />
+              <Input type="file" accept="image/*" onChange={handleImageChange} />
             </div>
 
-            {/* FIELDS */}
+            {/* NAME */}
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Nome</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
+                  <FormControl><Input {...field} /></FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Preço</FormLabel>
-                  <FormControl>
-                    <Input type="number" {...field} />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+            {/* PRICE + STOCK */}
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Preço (R$)</FormLabel>
+                    <FormControl><Input type="number" step="0.01" min="0" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="stock"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Quantidade</FormLabel>
+                    <FormControl><Input type="number" min="0" {...field} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
+            {/* CATEGORY */}
             <FormField
               control={form.control}
               name="category"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Categoria</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {CATEGORIES.map((c) => (
-                        <SelectItem key={c} value={c}>
-                          {c}
-                        </SelectItem>
+                        <SelectItem key={c} value={c}>{c}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+                  <FormMessage />
                 </FormItem>
               )}
             />
 
+            {/* STATUS */}
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Status</FormLabel>
+                  <Select
+                    onValueChange={(val) => {
+                      console.log("[CoralDialog] Status changed to:", val);
+                      field.onChange(val);
+                    }}
+                    value={field.value}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="available">Disponível</SelectItem>
+                      <SelectItem value="reserved">Reservado</SelectItem>
+                      <SelectItem value="sold">Vendido</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* SIZE */}
             <FormField
               control={form.control}
               name="size"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tamanho</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
+                  <FormControl><Input {...field} /></FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
 
+            {/* DESCRIPTION */}
             <FormField
               control={form.control}
               name="description"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Descrição</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} />
-                  </FormControl>
+                  <FormControl><Textarea {...field} /></FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* BUTTONS */}
             <DialogFooter>
               <Button
                 type="button"
@@ -330,11 +343,8 @@ export function CoralDialog({
               >
                 Cancelar
               </Button>
-
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting && (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                )}
+                {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 Salvar Coral
               </Button>
             </DialogFooter>

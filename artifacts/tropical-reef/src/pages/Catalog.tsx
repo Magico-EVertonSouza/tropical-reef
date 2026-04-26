@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
-import { getCorals } from "@/lib/firestore";
+import { useEffect, useState, useRef } from "react";
+import { subscribeCorals } from "@/lib/firestore";
 import { seedCoralsIfEmpty } from "@/lib/seed";
 import type { Coral, CoralCategory } from "@/types/coral";
 import { CoralCard } from "@/components/CoralCard";
@@ -27,48 +27,54 @@ export default function Catalog() {
   const [seeding, setSeeding] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<"All" | CoralCategory>("All");
+  const seededRef = useRef(false);
 
-  const { selectedCorals, orderViaWhatsApp } = useCart();
+  const { cartItems, cartTotal, cartCount, orderViaWhatsApp } = useCart();
   const { userProfile } = useAuth();
 
-  const fetchCorals = useCallback(async (category: "All" | CoralCategory) => {
+  useEffect(() => {
     setLoading(true);
     setError(null);
-    try {
-      const data = await getCorals(category === "All" ? undefined : { category });
-      setCorals(data);
+    seededRef.current = false;
 
-      // Auto-seed only on the "All" tab when collection is empty.
-      // By this point the Firestore connection is already warm, so the
-      // batch write will resolve quickly.
-      if (data.length === 0 && category === "All") {
-        setSeeding(true);
-        try {
-          const { seeded } = await seedCoralsIfEmpty();
-          if (seeded) {
-            const fresh = await getCorals();
-            setCorals(fresh);
+    const unsubscribe = subscribeCorals(
+      async (data) => {
+        if (activeCategory !== "All") {
+          setCorals(data.filter((c) => c.category === activeCategory));
+        } else {
+          setCorals(data);
+        }
+
+        setLoading(false);
+
+        if (data.length === 0 && activeCategory === "All" && !seededRef.current) {
+          seededRef.current = true;
+          setSeeding(true);
+          try {
+            const { seeded } = await seedCoralsIfEmpty();
+            if (!seeded) {
+              setSeeding(false);
+            }
+          } catch (seedErr: any) {
+            console.warn("[Catalog] Seed falhou:", seedErr?.message);
+            setError(seedErr?.message ?? "Erro ao inserir dados de demonstração.");
+            setSeeding(false);
           }
-        } catch (seedErr: any) {
-          // Non-fatal: show seed error as a banner but don't block catalog
-          console.warn("[Catalog] Seed falhou:", seedErr?.message);
-          setError(seedErr?.message ?? "Erro ao inserir dados de demonstração.");
-        } finally {
+        } else if (data.length > 0 && seeding) {
           setSeeding(false);
         }
-      }
-    } catch (err: any) {
-      const msg = err?.message ?? String(err);
-      console.error("[Catalog] ❌ Erro:", msg);
-      setError(msg);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      },
+      (err) => {
+        const msg = err?.message ?? String(err);
+        console.error("[Catalog] ❌ Erro:", msg);
+        setError(msg);
+        setLoading(false);
+      },
+      activeCategory !== "All" ? { category: activeCategory } : undefined
+    );
 
-  useEffect(() => {
-    fetchCorals(activeCategory);
-  }, [activeCategory, fetchCorals]);
+    return () => unsubscribe();
+  }, [activeCategory]);
 
   const isWorking = loading || seeding;
 
@@ -94,7 +100,7 @@ export default function Catalog() {
         </div>
       </section>
 
-      <main className="container flex-1 py-8 px-4 md:px-8 max-w-7xl mx-auto mb-24">
+      <main className="container flex-1 py-8 px-4 md:px-8 max-w-7xl mx-auto mb-32">
         {/* Filter Bar */}
         <div className="mb-8 sticky top-20 z-30 bg-background/90 backdrop-blur py-4 -mx-4 px-4 md:mx-0 md:px-0">
           <ScrollArea className="w-full whitespace-nowrap">
@@ -147,7 +153,7 @@ export default function Catalog() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="rounded-xl overflow-hidden bg-card border border-border/30">
-                <Skeleton className="aspect-square w-full bg-muted/40" />
+                <Skeleton className="h-48 w-full bg-muted/40" />
                 <div className="p-4 space-y-2">
                   <Skeleton className="h-4 w-2/3 bg-muted/40" />
                   <Skeleton className="h-3 w-1/3 bg-muted/40" />
@@ -179,13 +185,15 @@ export default function Catalog() {
       </main>
 
       {/* Floating Cart */}
-      {selectedCorals.length > 0 && (
+      {cartItems.length > 0 && (
         <div className="fixed bottom-0 left-0 right-0 p-4 z-50 animate-in slide-in-from-bottom-full duration-500">
-          <div className="max-w-md mx-auto bg-card border border-primary/30 shadow-[0_0_30px_rgba(212,175,55,0.15)] rounded-2xl p-4 flex items-center justify-between backdrop-blur-xl supports-[backdrop-filter]:bg-card/80">
+          <div className="max-w-lg mx-auto bg-card border border-primary/30 shadow-[0_0_30px_rgba(212,175,55,0.15)] rounded-2xl p-4 flex items-center justify-between backdrop-blur-xl supports-[backdrop-filter]:bg-card/80">
             <div className="flex flex-col">
-              <span className="text-sm text-muted-foreground font-medium">Selecionados</span>
-              <span className="text-lg font-bold text-white">
-                {selectedCorals.length} cora{selectedCorals.length === 1 ? "l" : "is"}
+              <span className="text-sm text-muted-foreground font-medium">
+                {cartCount} item{cartCount !== 1 ? "s" : ""} no carrinho
+              </span>
+              <span className="text-lg font-bold text-primary">
+                R$ {cartTotal.toFixed(2).replace(".", ",")}
               </span>
             </div>
             <Button
