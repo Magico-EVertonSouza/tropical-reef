@@ -63,20 +63,19 @@ export function CoralCard({ coral }: CoralCardProps) {
         onClick={toggleSelection}
         data-testid={`card-coral-${coral.id}`}
       >
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10" />
-        
-        {coral.imageUrl ? (
-          <img 
-            src={coral.imageUrl} 
-            alt={coral.name}
-            className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full bg-muted flex items-center justify-center">
-            <span className="text-muted-foreground">Sem imagem</span>
-          </div>
-        )}
+        <div className="w-full h-48 bg-muted rounded-md overflow-hidden">
+          {coral.imageUrl ? (
+            <img
+              src={coral.imageUrl}
+              alt={coral.name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-sm text-muted-foreground">
+              Sem imagem
+            </div>
+          )}
+        </div>
 
         <div className="absolute bottom-0 left-0 p-4 w-full z-20 flex flex-col gap-2">
           <div className="flex justify-between items-start gap-2">

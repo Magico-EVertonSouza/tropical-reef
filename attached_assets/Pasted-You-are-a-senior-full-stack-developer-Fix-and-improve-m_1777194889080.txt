@@ -1,0 +1,116 @@
+You are a senior full-stack developer.
+
+Fix and improve my coral e-commerce app using Firebase (Firestore) + React.
+
+IMPORTANT: Do not break existing structure. Only extend and fix.
+
+========================
+1. FIX STATUS UPDATE (ADMIN)
+========================
+Problem:
+Changing coral status (available, reserved, sold) is not persisting correctly.
+
+Fix:
+- Ensure updateCoral() correctly updates the "status" field in Firestore
+- Ensure the Select input in CoralDialog sends the correct value
+- Ensure UI updates immediately after change (refresh or optimistic update)
+- Add console logs to debug status updates
+
+========================
+2. ADD STOCK / QUANTITY SYSTEM
+========================
+Add a new field to corals:
+
+- stock: number (default: 1)
+
+Update:
+- Firestore createCoral → include stock
+- Firestore updateCoral → allow updating stock
+
+In Admin (CoralDialog):
+- Add input field: "Quantidade"
+- Type: number
+- Required
+- Minimum: 0
+
+In Catalog:
+- Show: "Disponível: X unidades"
+- If stock = 0 → show "Esgotado" and disable purchase button
+
+========================
+3. REAL-TIME STOCK UPDATE
+========================
+- Use Firestore onSnapshot instead of getDocs
+- Ensure catalog updates automatically when stock changes
+
+========================
+4. ADD CART SYSTEM (CLIENT SIDE)
+========================
+Create a cart system:
+
+Cart item:
+- id
+- name
+- price
+- quantity (selected by user)
+
+Features:
+- Add to cart
+- Increase/decrease quantity
+- Remove item
+- Prevent adding more than available stock
+
+Persist cart in:
+- localStorage
+
+========================
+5. STOCK CONTROL WHEN ADDING TO CART
+========================
+- If user tries to add more than stock → block
+- Show message: "Quantidade indisponível"
+
+========================
+6. WHATSAPP CHECKOUT (IMPROVED)
+========================
+Generate message:
+
+Format:
+Olá! 👋
+
+Gostaria de adquirir os seguintes corais:
+
+🪸 {name} ({code}) — Qtd: {qtd} — R$ {price}
+
+💰 Total: R$ {total}
+
+Add:
+- Calculate total automatically
+- Encode URL properly
+- Open WhatsApp link
+
+========================
+7. UI IMPROVEMENTS
+========================
+- Disable "Add to cart" if stock = 0
+- Show badge:
+  - available → verde
+  - reserved → amarelo
+  - sold → vermelho
+- Show stock near price
+
+========================
+8. PERFORMANCE / REPLIT LIMITS
+========================
+- Avoid unnecessary re-renders
+- Avoid infinite loops
+- Keep code simple (free plan friendly)
+
+========================
+
+Deliver:
+- Updated firestore.ts
+- Updated CoralDialog.tsx
+- New cart logic (hook or context)
+- Any small UI updates needed
+
+Explain briefly what was changed.
