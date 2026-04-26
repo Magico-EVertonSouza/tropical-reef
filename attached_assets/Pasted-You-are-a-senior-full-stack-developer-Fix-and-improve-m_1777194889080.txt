@@ -92,7 +92,7 @@ Add:
 7. UI IMPROVEMENTS
 ========================
 - Disable "Add to cart" if stock = 0
-- Show badge:
+- Show badge:firestore.ts
   - available → verde
   - reserved → amarelo
   - sold → vermelho
