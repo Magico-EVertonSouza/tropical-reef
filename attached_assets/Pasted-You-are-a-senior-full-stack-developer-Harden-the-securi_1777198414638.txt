@@ -1,0 +1,81 @@
+You are a senior full-stack developer.
+
+Harden the security of my Firebase + React coral e-commerce app.
+Do NOT break existing functionality. Only improve and secure.
+
+========================
+1. FIRESTORE SECURITY RULES
+========================
+Goal:
+- Public users can READ corals
+- Only ADMIN users can WRITE (create, update, delete)
+
+Rules:
+- Use Firebase Auth
+- Users collection has: role = "admin"
+
+Implement:
+- allow read: true for corals
+- allow write: only if request.auth != null AND user role == "admin"
+
+========================
+2. VALIDATE ADMIN ON CLIENT
+========================
+- Ensure admin routes are protected
+- If not admin → redirect to /login
+- Double-check admin role from Firestore
+
+========================
+3. INPUT VALIDATION (VERY IMPORTANT)
+========================
+- Validate all coral inputs before saving:
+  - name required
+  - price > 0
+  - stock >= 0
+  - category valid enum
+  - status valid enum
+
+- Prevent sending invalid data to Firestore
+
+========================
+4. PREVENT OVERWRITING DATA
+========================
+- Only update fields that exist
+- Avoid undefined values being saved
+
+========================
+5. SANITIZE IMAGE UPLOAD
+========================
+- Ensure image URL is valid string
+- Prevent empty imageUrl when creating coral
+
+========================
+6. ERROR HANDLING
+========================
+- Add try/catch to all Firestore calls
+- Show user-friendly error messages
+- Log errors in console for debugging
+
+========================
+7. REMOVE SENSITIVE LOGS
+========================
+- Remove logs that expose:
+  - Firebase config
+  - user data
+  - tokens
+
+========================
+8. PERFORMANCE SAFE
+========================
+- Avoid unnecessary re-renders
+- Avoid infinite loops
+- Keep code lightweight (Replit free plan)
+
+========================
+
+Deliver:
+- Updated Firestore rules (ready to paste)
+- Improved firestore.ts
+- Any small fixes in Admin/Auth needed
+
+Explain briefly what changed.

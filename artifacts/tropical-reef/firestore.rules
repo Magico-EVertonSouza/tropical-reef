@@ -1,0 +1,33 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper: checks that the caller is authenticated AND has role == "admin"
+    // in the users collection (server-side read — cannot be spoofed by the client).
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // ── Corals ────────────────────────────────────────────────────────────────
+    // Anyone (including unauthenticated visitors) can read the catalog.
+    // Only verified admins can create, update or delete corals.
+    match /corals/{coralId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ── Users ─────────────────────────────────────────────────────────────────
+    // A user can read and create their own document (used during registration).
+    // Only admins can update or delete any user document.
+    match /users/{userId} {
+      allow read: if request.auth != null
+        && (request.auth.uid == userId || isAdmin());
+      allow create: if request.auth != null
+        && request.auth.uid == userId;
+      allow update, delete: if isAdmin();
+    }
+  }
+}

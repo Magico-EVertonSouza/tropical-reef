@@ -56,9 +56,6 @@ if (isFirebaseConfigured) {
 
   auth = getAuth(app);
   storage = getStorage(app);
-
-  console.log("[Firebase] Project ID:", projectId);
-  console.log("[Firebase] Auth Domain:", authDomain);
 } else {
   const missing = [
     !apiKey && "VITE_FIREBASE_API_KEY",

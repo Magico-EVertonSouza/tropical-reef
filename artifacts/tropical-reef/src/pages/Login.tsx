@@ -86,16 +86,14 @@ export default function Login() {
   const onLoginSubmit = async (values: LoginFormValues) => {
     setIsSubmitting(true);
     setAuthError(null);
-    console.log("[Login] Tentando login com:", values.email);
     try {
       await login(values.email, values.password);
-      console.log("[Login] ✅ Login bem-sucedido");
       toast({ title: "Sucesso", description: "Login efetuado com sucesso." });
       setLocation("/");
     } catch (error: any) {
       const code = error?.code ?? "";
       const msg = translateFirebaseError(code);
-      console.error("[Login] ❌ Erro:", code, error.message);
+      console.error("[Login] ❌ Erro:", code);
       setAuthError(msg);
       toast({ title: "Erro no login", description: msg, variant: "destructive" });
     } finally {
@@ -106,16 +104,14 @@ export default function Login() {
   const onRegisterSubmit = async (values: RegisterFormValues) => {
     setIsSubmitting(true);
     setAuthError(null);
-    console.log("[Register] Criando conta para:", values.email);
     try {
       await register(values.email, values.password, values.name);
-      console.log("[Register] ✅ Conta criada com sucesso");
       toast({ title: "Sucesso", description: "Conta criada com sucesso." });
       setLocation("/");
     } catch (error: any) {
       const code = error?.code ?? "";
       const msg = translateFirebaseError(code);
-      console.error("[Register] ❌ Erro:", code, error.message);
+      console.error("[Register] ❌ Erro:", code);
       setAuthError(msg);
       toast({
         title: "Erro no cadastro",
